@@ -15,6 +15,7 @@ def clean():
 		shutil.rmtree("obj")
 
 	print ("Clean: done.")
+
 def build():
 	print ("--- Summit Compilation Helper --- ")
 	print ("Operation: Build")
@@ -28,6 +29,7 @@ def build():
 		for filename in fnmatch.filter(filenames, "*.c"):
 			cFiles.append(os.path.join(root, filename))
 			print("Adding C file ", filename, " to list of C files.")
+
 	print("-----------------")
 	asmFiles = []
 	print("Updating list of assembly files.")
@@ -35,6 +37,7 @@ def build():
 		for filename in fnmatch.filter(filenames, "*.S"):
 			asmFiles.append(os.path.join(root, filename))
 			print("Adding assembly file ", filename, " to list of assembly files.")
+
 	print("-----------------")
 
 
@@ -51,7 +54,24 @@ def build():
 			os.makedirs(os.path.dirname(os.path.abspath(cSourceFile)).replace("src", "obj"))
 			print("Made directory ", os.path.dirname(os.path.abspath(cSourceFile)).replace("src", "obj"))
 	print("-----------------")
-	print("Directories up-to-date.\nCompiling.")
+
+
+	print("Directories up-to-date.\nUpdating list of include directories.\n")
+
+	cCompilerArguments = ["-std=gnu99", "-ffreestanding", "-O2"]
+
+	for root, dirnames, filenames in os.walk("include"):
+		for dirname in dirnames:
+			cCompilerArguments.append("-I{0}".format(os.path.join(os.path.join(root, dirname))))
+			cCompilerArguments.append("-I"+root)
+			print("Added ", "-I{0}".format(os.path.join(os.path.join(root, dirname))), " to list of arguments.")
+
+	print("Added -Iinclude to list of arguments.")
+
+
+	print("Include directories done.")
+	print("-----------------\nCompiling.")
+
 	# Build all files
 
 	for asmSourceFile in asmFiles:
@@ -60,9 +80,7 @@ def build():
 
 	for cSourceFile in cFiles:
 		print("Compiling ", cSourceFile, " to ", cSourceFile.replace("src", "obj").replace(".c", ".o"))
-		subprocess.call([cCompiler, "-c", cSourceFile, "-o", cSourceFile.replace("src", "obj").replace(".c", ".o"),
-		 "-std=gnu99", "-ffreestanding", "-O2", "-Wall", "-Wextra"])
-
+		subprocess.call([cCompiler, "-c", cSourceFile, "-o", cSourceFile.replace("src", "obj").replace(".c", ".o")] + cCompilerArguments)
 	print("Compilation finished.\n-----------------\nLinking kernel to summit.bin.\n")
 
 	linkerParams = ["-T", "./linker.ld", "-o", "./summit.bin", "-ffreestanding", "-O2", "-nostdlib", "-lgcc"]
@@ -104,7 +122,7 @@ def update():
 if __name__ == "__main__":
 	
 	if sys.argv.__len__() > 1:
-		for x in sys.argv[1:]:
+		for x in sys.argv[0:]:
 			if x == "clean":
 				clean()
 			elif x == "build":
@@ -114,8 +132,9 @@ if __name__ == "__main__":
 			elif x == "update":
 				update()
 			elif x == "help":
-				print("Valid options: \nclean : deletes object directories and object files \nbuild : builds the current source tree\npull: pulls the source tree from git\nupdate: cleans, updates and builds the source tree.")
+				print("Valid options: \nclean : deletes object directories and object files \nbuild : builds the current source tree\npull: pulls the source tree from git\nupdate: cleans, updates and builds the source tree.\nstart-emu: starts the qemu-system-i386 emulator, if present in path.")
 			elif x == "start-emu":
+				print("Invoking emulator")
 				subprocess.call(["qemu-system-i386", "-kernel", "summit.bin"])
 	else:
 		print("Usage: compile.py argument")
