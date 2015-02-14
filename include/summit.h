@@ -18,5 +18,6 @@
 #endif
  
 #include <device/vga_term.h>
+#include <lib/string.h>
 
 #endif

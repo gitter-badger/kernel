@@ -1,7 +1,7 @@
 #ifndef SUMMIT_MULTIBOOT_H_
    #define SUMMIT_MULTIBOOT_H_
 
-   #define MULTIBOOT_HEADER_MAGIC x1BADB002
+   #define MULTIBOOT_HEADER_MAGIC 0x1BADB002
 
    #ifdef __ELF__
       #define MULTIBOOT_HEADER_FLAGS 0x00000003
@@ -9,9 +9,9 @@
       #define MULTIBOOT_HEADER_FLAGS 0x00010003
    #endif
 
-   #define MULTIBOOT_BOOTLOADER_MAGIC x2BADB002
+   #define MULTIBOOT_BOOTLOADER_MAGIC 0x2BADB002
 
-   #define STACK_SIZE x4000
+   #define STACK_SIZE 0x4000
    #ifndef ASM
 
    typedef struct multiboot_header
